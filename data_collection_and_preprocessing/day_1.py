@@ -1,10 +1,10 @@
 from urllib import request
 from bs4 import BeautifulSoup as bs
 import pandas as pd 
+from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException as e
+import time
 
-def get_soup(url):
-    link = request.urlopen(url)
-    return bs(link, 'html.parser')
 def add_first(top, bottom):
     data["Rank"].append(top.find('div', class_='c-chart__table--rank').get_text())
     data["Title"].append(top.find('div', class_='c-chart__table--title').find('p').get_text())
@@ -19,9 +19,22 @@ def add_first(top, bottom):
 
 
 if __name__ == '__main__':    
-    data = {"Rank": [], "Title": [], "Artists": [], "Weeks_on_Chart": [], "Song_Streams": [], 'Song_Units': [], "Record_Label": [], "Top_Cities": []}
     url = "https://www.rollingstone.com/charts/songs/"
-    soup = get_soup(url)
+
+    driver = webdriver.Firefox(executable_path=r"/home/thedarkcoder/geckodriver/geckodriver")
+    driver.get(url)
+    counter = 15
+    while counter < 100:
+        string = '[data-counter="' + str(counter)  + '"]'
+        link = driver.find_elements_by_css_selector(string)
+        print(link)
+        link[0].click()
+        time.sleep(1)
+        counter += 15
+
+    url = driver.page_source
+    data = {"Rank": [], "Title": [], "Artists": [], "Weeks_on_Chart": [], "Song_Streams": [], 'Song_Units': [], "Record_Label": [], "Top_Cities": []}
+    soup = bs(url, 'html.parser')
     city_list = []
     top = soup.find_all('div', attrs={'class':'c-chart__table--top'})
     container = soup.find_all('div', attrs={'class':'c-chart__table--container'})
