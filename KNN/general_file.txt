@@ -1,0 +1,3 @@
+2    458
+4    241
+Name: label, dtype: int64
